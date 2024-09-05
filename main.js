@@ -1,14 +1,31 @@
 const _this = {};
 
 const canvas = document.getElementsByTagName("canvas")[0];
-const LNG = -122.4175, LAT = 37.655;
+// const LNG = -122.4175, LAT = 37.655, ALT = 19159568;
+let LNG = 105, LAT = 30, ALT = 19159568;
+
+const setMyPosition = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser!')
+    } else {
+      navigator.geolocation.getCurrentPosition((position) => {
+        LNG = position.coords.longitude, LAT = position.coords.latitude, ALT = position.coords.altitude;
+      }, () => {
+        alert('Unable to retrieve your position!')
+      })
+    }
+}
 
 function initCesium() {
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5Y2U0ZTk2Ni1jNzdkLTQ3OWYtYjVmYS0yMGM3YTk3NjgzMmUiLCJpZCI6Njk5Nywic2NvcGVzIjpbImFzciIsImdjIl0sImlhdCI6MTU0ODA1MTc0OH0.Csy6yyAnv6JSBppH0Ou3ahshqcHFEhP27iOz5gjQMEo'
+
     const viewer = new Cesium.Viewer('cesiumContainer', {
-        terrainProvider: Cesium.createWorldTerrain(),
-        useDefaultRenderLoop: false
+        // terrainProvider: Cesium.createWorldTerrain(),
+        // terrain: Cesium.Terrain.fromWorldTerrain(),
+        // useDefaultRenderLoop: false
     });
 
+    // alert('flyTo: ' + LNG + ', ' + LAT + ', ' + ALT);
     viewer.camera.flyTo({
         destination : Cesium.Cartesian3.fromDegrees(LNG, LAT, 300),
         orientation : {
@@ -91,10 +108,14 @@ function cart2vec(cart) {
     return new BABYLON.Vector3(cart.x, cart.z, cart.y);
 }
 
-initCesium();
-initBabylon();
-_this.engine.runRenderLoop(() => {
-    _this.viewer.render();
-    moveBabylonCamera();
-    _this.scene.render();
-});
+setMyPosition()
+
+setTimeout(() => {
+    initCesium();
+    initBabylon();
+    _this.engine.runRenderLoop(() => {
+        _this.viewer.render();
+        moveBabylonCamera();
+        _this.scene.render();
+    });
+}, 3000)
